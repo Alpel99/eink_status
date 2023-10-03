@@ -10,6 +10,27 @@ inky_display = InkyPHAT("black")
 # URL to make the HTTP request to
 url = "http://glasergasse:8080"
 
+def drawOffline():
+    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.truetype(FredokaOne, 30)
+
+    m1 = "Glasergasse"
+    # m1 = url
+    m2 = "is offline"
+    w1, h1 = font.getsize(m1)
+    w2, h2 = font.getsize(m2)
+    o = h1/2
+    x1 = (inky_display.WIDTH / 2) - (w1 / 2)
+    x2 = (inky_display.WIDTH / 2) - (w2 / 2)
+    y1 = (inky_display.HEIGHT / 2) - (h1 / 2) - o
+    y2 = (inky_display.HEIGHT / 2) + (h2 / 2) - o
+        
+    draw.text((x1, y1), m1, inky_display.BLACK, font)
+    draw.text((x2, y2), m2, inky_display.BLACK, font)
+    inky_display.set_image(img)
+    inky_display.show()
+
 try:
     # Make an HTTP GET request to the URL
     response = requests.get(url)
@@ -55,19 +76,9 @@ try:
 
     else:
         print(f"HTTP request failed with status code {response.status_code}")
-
-        img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
-        draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype(FredokaOne, 20)
-
-        message = "Glasergasse is offline"
-        w, h = font.getsize(message)
-        x = (inky_display.WIDTH / 2) - (w / 2)
-        y = (inky_display.HEIGHT / 2) - (h / 2)
-        
-        draw.text((x, y), message, inky_display.BLACK, font)        
-        inky_display.set_image(img)
-        inky_display.show()
+        drawOffline()
 
 except Exception as e:
     print(f"Error: {str(e)}")
+    drawOffline()
+
