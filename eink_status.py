@@ -10,26 +10,42 @@ inky_display = InkyPHAT("black")
 # URL to make the HTTP request to
 url = "http://glasergasse:8080"
 
-def drawOffline():
-    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype(FredokaOne, 30)
+def writeState(value):
+    with open('/tmp/boolean_state.txt', 'w') as file:
+        file.write(str(int(value)))
 
-    m1 = "Glasergasse"
-    # m1 = url
-    m2 = "is offline"
-    w1, h1 = font.getsize(m1)
-    w2, h2 = font.getsize(m2)
-    o = h1/2
-    x1 = (inky_display.WIDTH / 2) - (w1 / 2)
-    x2 = (inky_display.WIDTH / 2) - (w2 / 2)
-    y1 = (inky_display.HEIGHT / 2) - (h1 / 2) - o
-    y2 = (inky_display.HEIGHT / 2) + (h2 / 2) - o
-        
-    draw.text((x1, y1), m1, inky_display.BLACK, font)
-    draw.text((x2, y2), m2, inky_display.BLACK, font)
-    inky_display.set_image(img)
-    inky_display.show()
+def checkState():
+    try:
+        with open('/tmp/boolean_state.txt', 'r') as file:
+            return bool(int(file.read()))
+    except FileNotFoundError:
+        value = False
+        writeState(False)
+        # Return a default value (False) if the file doesn't exist
+        return value
+
+def drawOffline():
+    if(not checkState()):
+        img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
+        draw = ImageDraw.Draw(img)
+        font = ImageFont.truetype(FredokaOne, 30)
+    
+        m1 = "Glasergasse"
+        # m1 = url
+        m2 = "is offline"
+        w1, h1 = font.getsize(m1)
+        w2, h2 = font.getsize(m2)
+        o = h1/2
+        x1 = (inky_display.WIDTH / 2) - (w1 / 2)
+        x2 = (inky_display.WIDTH / 2) - (w2 / 2)
+        y1 = (inky_display.HEIGHT / 2) - (h1 / 2) - o
+        y2 = (inky_display.HEIGHT / 2) + (h2 / 2) - o
+            
+        draw.text((x1, y1), m1, inky_display.BLACK, font)
+        draw.text((x2, y2), m2, inky_display.BLACK, font)
+        inky_display.set_image(img)
+        inky_display.show()
+        writeState(True)
 
 try:
     # Make an HTTP GET request to the URL
@@ -73,6 +89,7 @@ try:
         # Display the image on the Inky pHAT
         inky_display.set_image(img)
         inky_display.show()
+        writeState(False)
 
     else:
         print(f"HTTP request failed with status code {response.status_code}")
